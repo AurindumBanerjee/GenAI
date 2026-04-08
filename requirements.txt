@@ -1,0 +1,272 @@
+# Multi-Agent System Using Google ADK
+
+## Requirements
+
+Python 3.9+
+
+### Core Dependencies
+sqlalchemy==2.0.23
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+### Optional Dependencies (for future enhancements)
+# For async database operations
+sqlalchemy[asyncio]==2.0.23
+
+# For semantic search and embeddings
+# openai==1.3.6
+# sentence-transformers==2.2.2
+# numpy==1.24.3
+
+# For API server
+# fastapi==0.104.1
+# uvicorn==0.24.0
+
+# For testing
+# pytest==7.4.3
+# pytest-asyncio==0.21.1
+
+# For logging and monitoring
+# python-json-logger==2.0.7
+# structlog==23.2.0
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+## Project Structure
+
+```
+GenAI/
+├── agents/
+│   ├── __init__.py
+│   ├── base_agent.py          # Abstract base class for all agents
+│   ├── orchestrator.py         # Main orchestrator agent
+│   ├── task_agent.py          # Task management agent
+│   ├── calendar_agent.py       # Calendar/event management agent
+│   └── notes_agent.py         # Notes management agent
+├── db/
+│   ├── __init__.py
+│   ├── models.py              # SQLAlchemy ORM models
+│   └── database.py            # Database connection and session management
+├── utils/
+│   ├── __init__.py
+│   ├── config.py              # Configuration and environment variables
+│   └── schemas.py             # Pydantic request/response schemas
+├── main.py                     # Entry point and demo
+├── requirements.txt            # Python dependencies
+└── README.md                   # This file
+```
+
+## Architecture Overview
+
+### Core Components
+
+1. **Base Agent (`base_agent.py`)**
+   - Abstract `BaseAgent` class that all agents inherit from
+   - Defines common interface: `handle_request()`, `add_tool()`, `log_execution()`
+   - Provides agent status tracking and execution history
+   - `BaseTool` class for tool definitions (placeholder for future integration)
+
+2. **Orchestrator Agent (`orchestrator.py`)**
+   - Routes user requests to appropriate specialized agents
+   - Performs intent detection (task, calendar, note, unknown)
+   - Builds execution plans with multiple steps
+   - Manages agent registration and workflow execution
+
+3. **Specialized Agents**
+   - **TaskAgent**: Task creation, retrieval, filtering, status updates
+   - **CalendarAgent**: Event scheduling, conflict checking, participant management
+   - **NotesAgent**: Note creation, semantic search, tagging
+
+4. **Database Layer (`db/`)**
+   - SQLAlchemy ORM models for Tasks, Events, and Notes
+   - DatabaseManager for connection pooling and session management
+   - Support for SQLite (default) and other SQL databases
+
+5. **Schemas (`utils/schemas.py`)**
+   - Pydantic models for request/response validation
+   - Schemas: TaskCreate/Response, EventCreate/Response, NoteCreate/Response
+
+6. **Configuration (`utils/config.py`)**
+   - Centralized configuration management
+   - Environment variable support
+   - Feature flags for future integrations
+
+## Usage
+
+### Basic Initialization
+
+```python
+from agents import OrchestratorAgent, TaskAgent, CalendarAgent, NotesAgent
+from db import init_database
+from utils import Config
+
+# Initialize database
+init_database(Config.get_database_url())
+
+# Create agents
+orchestrator = OrchestratorAgent()
+task_agent = TaskAgent()
+calendar_agent = CalendarAgent()
+notes_agent = NotesAgent()
+
+# Register agents
+orchestrator.register_agent(task_agent)
+orchestrator.register_agent(calendar_agent)
+orchestrator.register_agent(notes_agent)
+```
+
+### Processing User Requests
+
+```python
+# User makes a request
+user_request = "Create a task to finish the report by Friday with high priority"
+
+# Orchestrator routes the request
+response = orchestrator.handle_request(user_request)
+
+# Execute the plan
+if response.get("execution_plan"):
+    result = orchestrator.execute_plan(response["execution_plan"])
+```
+
+### Direct Agent Usage
+
+```python
+from datetime import datetime, timedelta
+
+# Create a task
+task_result = task_agent.create_task(
+    title="Complete documentation",
+    priority=2,
+    due_date=datetime.utcnow() + timedelta(days=7)
+)
+
+# Schedule an event
+event_result = calendar_agent.schedule_event(
+    title="Team Standup",
+    start_time=datetime.utcnow() + timedelta(days=1, hours=10),
+    end_time=datetime.utcnow() + timedelta(days=1, hours=10, minutes=30),
+    participants=["alice@company.com", "bob@company.com"]
+)
+
+# Create a note
+note_result = notes_agent.create_note(
+    title="Architecture Notes",
+    content="Multi-agent system with orchestrator pattern",
+    tags=["architecture", "ai"]
+)
+```
+
+### Running Demos
+
+```bash
+# Demo 1: Request routing and orchestration
+python main.py --demo requests
+
+# Demo 2: Individual agent methods
+python main.py --demo methods
+
+# Demo 3: System information and configuration
+python main.py --demo info
+```
+
+## Database Schema
+
+### Tasks Table
+- `id`: Primary key
+- `title`: Task title
+- `description`: Task description
+- `due_date`: Due date
+- `priority`: Priority level (0-3)
+- `status`: Task status (pending, in_progress, completed, cancelled)
+- `created_at`, `updated_at`: Timestamps
+
+### Events Table
+- `id`: Primary key
+- `title`: Event title
+- `description`: Event description
+- `start_time`: Event start time
+- `end_time`: Event end time
+- `participants`: JSON list of participants
+- `location`: Event location
+- `created_at`, `updated_at`: Timestamps
+
+### Notes Table
+- `id`: Primary key
+- `title`: Note title
+- `content`: Note content
+- `tags`: JSON list of tags
+- `embedding`: Optional vector embedding for semantic search
+- `created_at`, `updated_at`: Timestamps
+
+## Next Steps (Future Enhancements)
+
+1. **Tool Integration** (Step 7)
+   - Implement actual database operations in agent methods
+   - Add Google Calendar API integration
+   - Add Gmail integration for email-based tasks
+
+2. **Natural Language Processing**
+   - Enhanced intent detection with ML models
+   - Entity extraction for better request parsing
+   - Semantic understanding of complex queries
+
+3. **Semantic Search**
+   - Integration with embedding models
+   - Semantic search for notes
+   - Similar task/event suggestions
+
+4. **API Server**
+   - FastAPI endpoint for request handling
+   - WebSocket support for real-time updates
+   - Authentication and authorization
+
+5. **Advanced Features**
+   - Multi-agent collaboration patterns
+   - Conflict resolution strategies
+   - Learning from execution history
+   - Workflow automation and triggers
+
+## Key Design Patterns
+
+1. **Abstract Base Class Pattern**: `BaseAgent` provides common interface
+2. **Strategy Pattern**: Different agents implement different strategies
+3. **Orchestrator Pattern**: Central orchestrator routes to specialized agents
+4. **Factory Pattern**: Database and configuration initialization
+5. **Context Manager Pattern**: Database session management
+6. **Singleton Pattern**: Global database manager instance
+
+## Configuration
+
+Configuration can be set via:
+1. Environment variables (`.env` file)
+2. `Config` class in `utils/config.py`
+
+### Example `.env` file:
+```
+DATABASE_URL=sqlite:///./data/app.db
+DEBUG=True
+ENABLE_CALENDAR_SYNC=False
+ENABLE_SEMANTIC_SEARCH=False
+```
+
+## Notes
+
+- This is the foundational step focusing on architecture and structure
+- No external tool integrations (Google Calendar, Gmail, etc.) yet
+- Database operations are placeholders showing the interface
+- Actual tool integration will happen in future steps
+- All code includes comprehensive docstrings for maintainability
+
+## Author
+
+AI Systems Engineer
+
+## License
+
+MIT
