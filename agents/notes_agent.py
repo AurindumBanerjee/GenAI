@@ -1,11 +1,13 @@
 """
 Notes Agent - Manages note creation, retrieval, and semantic search.
 Handles all note-related operations for the system.
+Integrates with NotesTool for database operations.
 """
 
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from agents.base_agent import BaseAgent, AgentRole, AgentStatus
+from tools.notes_tool import NotesTool
 
 
 class NotesAgent(BaseAgent):
@@ -97,7 +99,7 @@ class NotesAgent(BaseAgent):
         tags: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        Create a new note (placeholder - actual DB interaction in tool integration).
+        Create a new note using NotesTool.
 
         Args:
             content: Note content/body
@@ -107,19 +109,7 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with note data and metadata
         """
-        note_data = {
-            "title": title or f"Note {datetime.utcnow().strftime('%Y-%m-%d %H:%M')}",
-            "content": content,
-            "tags": tags or [],
-            "created_at": datetime.utcnow().isoformat(),
-            "word_count": len(content.split())
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Note creation pending database integration",
-            "note_data": note_data
-        }
+        return NotesTool.create_note(content=content, title=title, tags=tags)
 
     def search_notes(
         self,
@@ -141,19 +131,19 @@ class NotesAgent(BaseAgent):
             Dictionary with search parameters
         """
         return {
-            "status": "pending_db_execution",
-            "message": "Note search pending database integration",
-            "search_params": {
-                "query": query,
-                "search_type": search_type,
-                "tags": tags,
-                "limit": limit
-            }
-        }
+            "status": "pending_db_execution",using NotesTool.
 
-    def get_note(self, note_id: int) -> Dict[str, Any]:
+        Args:
+            query: Search query string
+            search_type: Type of search: 'keyword' or 'semantic' (embedding-based)
+            tags: Optional tags to filter by
+            limit: Maximum number of results
+
+        Returns:
+            Dictionary with search parameters
         """
-        Retrieve a specific note by ID.
+        return NotesTool.search_notes(query=query, search_type=search_type, tags=tags, limit=limit)eturn {
+            "status": "pending_db_exec using NotesTool.
 
         Args:
             note_id: Note ID to retrieve
@@ -161,11 +151,7 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with note details
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Note retrieval pending database integration",
-            "note_id": note_id
-        }
+        return NotesTool.get_note(note_id)
 
     def get_notes(
         self,
@@ -175,7 +161,7 @@ class NotesAgent(BaseAgent):
         limit: int = 100
     ) -> Dict[str, Any]:
         """
-        Retrieve notes with optional filtering by tags and date range.
+        Retrieve notes with optional filtering by tags and date range using NotesTool.
 
         Args:
             tags: Optional list of tags to filter by
@@ -186,22 +172,11 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with note results
         """
-        filters = {
-            "tags": tags,
-            "date_from": date_from.isoformat() if date_from else None,
-            "date_to": date_to.isoformat() if date_to else None,
-            "limit": limit
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Note retrieval pending database integration",
-            "filters": {k: v for k, v in filters.items() if v is not None}
-        }
+        return NotesTool.list_notes(tags=tags, date_from=date_from, date_to=date_to, limit=limit)
 
     def add_tag(self, note_id: int, tag: str) -> Dict[str, Any]:
         """
-        Add a tag to an existing note.
+        Add a tag to an existing note using NotesTool.
 
         Args:
             note_id: Note ID
@@ -210,16 +185,11 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with update status
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Tag addition pending database integration",
-            "note_id": note_id,
-            "tag": tag
-        }
+        return NotesTool.add_tag(note_id, tag)
 
     def remove_tag(self, note_id: int, tag: str) -> Dict[str, Any]:
         """
-        Remove a tag from a note.
+        Remove a tag from a note using NotesTool.
 
         Args:
             note_id: Note ID
@@ -228,16 +198,11 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with update status
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Tag removal pending database integration",
-            "note_id": note_id,
-            "tag": tag
-        }
+        return NotesTool.remove_tag(note_id, tag)
 
     def get_notes_by_tag(self, tag: str) -> Dict[str, Any]:
         """
-        Get all notes with a specific tag.
+        Get all notes with a specific tag using NotesTool.
 
         Args:
             tag: Tag to filter by
@@ -245,8 +210,4 @@ class NotesAgent(BaseAgent):
         Returns:
             Dictionary with filtered notes
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Tag-based note query pending database integration",
-            "filter": {"tag": tag}
-        }
+        return NotesTool.get_notes_by_tag(tag)

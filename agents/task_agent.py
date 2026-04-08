@@ -1,11 +1,13 @@
 """
 Task Agent - Manages task creation, retrieval, and status updates.
 Handles all task-related operations for the system.
+Integrates with TaskTool for database operations.
 """
 
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from agents.base_agent import BaseAgent, AgentRole, AgentStatus
+from tools.task_tool import TaskTool
 
 
 class TaskAgent(BaseAgent):
@@ -96,7 +98,7 @@ class TaskAgent(BaseAgent):
         status: str = "pending"
     ) -> Dict[str, Any]:
         """
-        Create a new task (placeholder - actual DB interaction in tool integration).
+        Create a new task using TaskTool.
 
         Args:
             title: Task title
@@ -108,20 +110,13 @@ class TaskAgent(BaseAgent):
         Returns:
             Dictionary with task data and metadata
         """
-        task_data = {
-            "title": title,
-            "description": description,
-            "due_date": due_date.isoformat() if due_date else None,
-            "priority": priority,
-            "status": status,
-            "created_at": datetime.utcnow().isoformat()
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Task creation pending database integration",
-            "task_data": task_data
-        }
+        return TaskTool.create_task(
+            title=title,
+            description=description,
+            due_date=due_date,
+            priority=priority,
+            status=status
+        )
 
     def get_tasks(
         self,
@@ -132,9 +127,14 @@ class TaskAgent(BaseAgent):
     ) -> Dict[str, Any]:
         """
         Retrieve tasks with optional filtering (placeholder).
+status: Optional[str] = None,
+        priority: Optional[int] = None,
+        limit: int = 100
+    ) -> Dict[str, Any]:
+        """
+        Retrieve tasks with optional filtering using TaskTool.
 
         Args:
-            task_id: Optional specific task ID
             status: Optional status filter
             priority: Optional priority filter
             limit: Maximum number of tasks to return
@@ -142,25 +142,7 @@ class TaskAgent(BaseAgent):
         Returns:
             Dictionary with task results
         """
-        filters = {
-            "task_id": task_id,
-            "status": status,
-            "priority": priority,
-            "limit": limit
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Task retrieval pending database integration",
-            "filters": {k: v for k, v in filters.items() if v is not None}
-        }
-
-    def update_task(
-        self,
-        task_id: int,
-        updates: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
+        return TaskTool.list_tasks(status=status, priority=priority, limit=limit)""
         Update an existing task (placeholder).
 
         Args:
@@ -174,21 +156,16 @@ class TaskAgent(BaseAgent):
             "status": "pending_db_execution",
             "message": "Task update pending database integration",
             "task_id": task_id,
-            "updates": updates
-        }
-
-    def get_tasks_by_priority(self, priority: int) -> Dict[str, Any]:
-        """
-        Get all tasks with a specific priority level.
+            "updates": updatesusing TaskTool.
 
         Args:
-            priority: Priority level to filter by
+            task_id: ID of task to update
+            updates: Dictionary of fields to update
 
         Returns:
-            Dictionary with filtered tasks
+            Dictionary with update status
         """
-        return {
-            "status": "pending_db_execution",
+        return TaskTool.update_task(task_id, updates)   "status": "pending_db_execution",
             "message": "Task query pending database integration",
             "filter": {"priority": priority}
         }
@@ -197,11 +174,21 @@ class TaskAgent(BaseAgent):
         """
         Get all tasks that are past their due date.
 
+        Returns: using TaskTool.
+
+        Args:
+            priority: Priority level to filter by
+
+        Returns:
+            Dictionary with filtered tasks
+        """
+        return TaskTool.list_tasks(priority=priority)
+
+    def get_overdue_tasks(self) -> Dict[str, Any]:
+        """
+        Get all tasks that are past their due date using TaskTool.
+
         Returns:
             Dictionary with overdue tasks
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Overdue task query pending database integration",
-            "filter": {"condition": "due_date < now() AND status != 'completed'"}
-        }
+        return TaskTool.get_overdue_tasks()

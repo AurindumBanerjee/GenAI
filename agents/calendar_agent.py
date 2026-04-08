@@ -1,11 +1,13 @@
 """
 Calendar Agent - Manages event scheduling and conflict detection.
 Handles calendar operations and event management.
+Integrates with CalendarTool for database operations.
 """
 
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timedelta
 from agents.base_agent import BaseAgent, AgentRole, AgentStatus
+from tools.calendar_tool import CalendarTool
 
 
 class CalendarAgent(BaseAgent):
@@ -98,7 +100,7 @@ class CalendarAgent(BaseAgent):
         check_conflicts: bool = True
     ) -> Dict[str, Any]:
         """
-        Schedule a new event (placeholder - actual DB interaction in tool integration).
+        Schedule a new event using CalendarTool.
 
         Args:
             title: Event title
@@ -112,22 +114,15 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with event data and scheduling status
         """
-        event_data = {
-            "title": title,
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "participants": participants or [],
-            "location": location,
-            "description": description,
-            "duration_minutes": int((end_time - start_time).total_seconds() / 60)
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Event scheduling pending database integration",
-            "check_conflicts": check_conflicts,
-            "event_data": event_data
-        }
+        return CalendarTool.schedule_event(
+            title=title,
+            start_time=start_time,
+            end_time=end_time,
+            participants=participants,
+            location=location,
+            description=description,
+            check_conflicts=check_conflicts
+        )
 
     def check_conflicts(
         self,
@@ -143,22 +138,22 @@ class CalendarAgent(BaseAgent):
             end_time: End time to check
             participant_email: Optional specific participant to check
 
+        Returns: using CalendarTool.
+
+        Args:
+            start_time: Start time to check
+            end_time: End time to check
+            participant_email: Optional specific participant to check
+
         Returns:
             Dictionary with conflict information
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Conflict checking pending database integration",
-            "time_slot": {
-                "start_time": start_time.isoformat(),
-                "end_time": end_time.isoformat()
-            },
-            "participant": participant_email
-        }
+        return CalendarTool.check_availability(start_time, end_time, participant_email)   event_id: Event ID to retrieve
 
-    def get_event(self, event_id: int) -> Dict[str, Any]:
+        Returns:
+            Dictionary with event details
         """
-        Retrieve a specific event by ID.
+        return { using CalendarTool.
 
         Args:
             event_id: Event ID to retrieve
@@ -166,11 +161,7 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with event details
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Event retrieval pending database integration",
-            "event_id": event_id
-        }
+        return CalendarTool.get_event(event_id)
 
     def get_events(
         self,
@@ -180,7 +171,7 @@ class CalendarAgent(BaseAgent):
         limit: int = 100
     ) -> Dict[str, Any]:
         """
-        Retrieve events with optional filtering.
+        Retrieve events with optional filtering using CalendarTool.
 
         Args:
             start_date: Optional start date for filtering
@@ -191,18 +182,7 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with event results
         """
-        filters = {
-            "start_date": start_date.isoformat() if start_date else None,
-            "end_date": end_date.isoformat() if end_date else None,
-            "participant": participant,
-            "limit": limit
-        }
-
-        return {
-            "status": "pending_db_execution",
-            "message": "Event retrieval pending database integration",
-            "filters": {k: v for k, v in filters.items() if v is not None}
-        }
+        return CalendarTool.list_events(start_date, end_date, limit)
 
     def get_available_slots(
         self,
@@ -211,7 +191,7 @@ class CalendarAgent(BaseAgent):
         participant: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Find available time slots on a given date.
+        Find available time slots on a given date using CalendarTool.
 
         Args:
             date: Date to find available slots for
@@ -221,19 +201,50 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with available time slots
         """
+        # Get all events for the day
+        start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+        
+        events_result = CalendarTool.list_events(start_of_day, end_of_day)
+        events = events_result.get("data", [])
+        
+        # Find gaps
+        busy_times = [(datetime.fromisoformat(e["start_time"]), 
+                      datetime.fromisoformat(e["end_time"])) for e in events]
+        
+        available_slots = []
+        current_time = start_of_day
+        
+        for busy_start, busy_end in sorted(busy_times):
+            if (busy_start - current_time).total_seconds() >= duration_minutes * 60:
+                available_slots.append({
+                    "start_time": current_time.isoformat(),
+                    "end_time": busy_start.isoformat(),
+                    "duration_minutes": int((busy_start - current_time).total_seconds() / 60)
+                })
+            current_time = max(current_time, busy_end)
+        
+        # Add final slot if available
+        if (end_of_day - current_time).total_seconds() >= duration_minutes * 60:
+            available_slots.append({
+                "start_time": current_time.isoformat(),
+                "end_time": end_of_day.isoformat(),
+                "duration_minutes": int((end_of_day - current_time).total_seconds() / 60)
+            })
+        
         return {
-            "status": "pending_db_execution",
-            "message": "Available slots query pending database integration",
-            "query": {
-                "date": date.isoformat(),
-                "duration_minutes": duration_minutes,
-                "participant": participant
-            }
+            "status": "success",
+            "action": "get_available_slots",
+            "data": available_slots,
+            "count": len(available_slots),
+            "date": date.isoformat(),
+            "required_duration": duration_minutes,
+            "message": f"Found {len(available_slots)} available slots"
         }
 
     def add_participant(self, event_id: int, participant_email: str) -> Dict[str, Any]:
         """
-        Add a participant to an existing event.
+        Add a participant to an existing event using CalendarTool.
 
         Args:
             event_id: Event ID
@@ -242,9 +253,4 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with update status
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Participant addition pending database integration",
-            "event_id": event_id,
-            "participant": participant_email
-        }
+        return CalendarTool.add_participant(event_id, participant_email)
