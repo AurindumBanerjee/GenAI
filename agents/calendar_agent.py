@@ -131,14 +131,7 @@ class CalendarAgent(BaseAgent):
         participant_email: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Check for scheduling conflicts in the given time slot.
-
-        Args:
-            start_time: Start time to check
-            end_time: End time to check
-            participant_email: Optional specific participant to check
-
-        Returns: using CalendarTool.
+        Check for scheduling conflicts in the given time slot using CalendarTool.
 
         Args:
             start_time: Start time to check
@@ -148,12 +141,11 @@ class CalendarAgent(BaseAgent):
         Returns:
             Dictionary with conflict information
         """
-        return CalendarTool.check_availability(start_time, end_time, participant_email)   event_id: Event ID to retrieve
+        return CalendarTool.check_availability(start_time, end_time, participant_email)
 
-        Returns:
-            Dictionary with event details
+    def get_event(self, event_id: int) -> Dict[str, Any]:
         """
-        return { using CalendarTool.
+        Retrieve a specific event by ID using CalendarTool.
 
         Args:
             event_id: Event ID to retrieve

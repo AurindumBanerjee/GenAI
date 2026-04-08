@@ -119,7 +119,7 @@ class NotesAgent(BaseAgent):
         limit: int = 50
     ) -> Dict[str, Any]:
         """
-        Search notes by keyword or semantic similarity (placeholder).
+        Search notes by keyword or semantic similarity using NotesTool.
 
         Args:
             query: Search query string
@@ -128,22 +128,13 @@ class NotesAgent(BaseAgent):
             limit: Maximum number of results
 
         Returns:
-            Dictionary with search parameters
+            Dictionary with search results
         """
-        return {
-            "status": "pending_db_execution",using NotesTool.
+        return NotesTool.search_notes(query=query, search_type=search_type, tags=tags, limit=limit)
 
-        Args:
-            query: Search query string
-            search_type: Type of search: 'keyword' or 'semantic' (embedding-based)
-            tags: Optional tags to filter by
-            limit: Maximum number of results
-
-        Returns:
-            Dictionary with search parameters
+    def get_note(self, note_id: int) -> Dict[str, Any]:
         """
-        return NotesTool.search_notes(query=query, search_type=search_type, tags=tags, limit=limit)eturn {
-            "status": "pending_db_exec using NotesTool.
+        Retrieve a specific note by ID using NotesTool.
 
         Args:
             note_id: Note ID to retrieve

@@ -118,16 +118,21 @@ class TaskAgent(BaseAgent):
             status=status
         )
 
+    def get_task(self, task_id: int) -> Dict[str, Any]:
+        """
+        Retrieve a specific task by ID using TaskTool.
+
+        Args:
+            task_id: ID of task to retrieve
+
+        Returns:
+            Dictionary with task details
+        """
+        return TaskTool.get_task(task_id)
+
     def get_tasks(
         self,
-        task_id: Optional[int] = None,
         status: Optional[str] = None,
-        priority: Optional[int] = None,
-        limit: int = 100
-    ) -> Dict[str, Any]:
-        """
-        Retrieve tasks with optional filtering (placeholder).
-status: Optional[str] = None,
         priority: Optional[int] = None,
         limit: int = 100
     ) -> Dict[str, Any]:
@@ -142,8 +147,11 @@ status: Optional[str] = None,
         Returns:
             Dictionary with task results
         """
-        return TaskTool.list_tasks(status=status, priority=priority, limit=limit)""
-        Update an existing task (placeholder).
+        return TaskTool.list_tasks(status=status, priority=priority, limit=limit)
+
+    def update_task(self, task_id: int, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update an existing task using TaskTool.
 
         Args:
             task_id: ID of task to update
@@ -152,29 +160,11 @@ status: Optional[str] = None,
         Returns:
             Dictionary with update status
         """
-        return {
-            "status": "pending_db_execution",
-            "message": "Task update pending database integration",
-            "task_id": task_id,
-            "updates": updatesusing TaskTool.
+        return TaskTool.update_task(task_id, updates)
 
-        Args:
-            task_id: ID of task to update
-            updates: Dictionary of fields to update
-
-        Returns:
-            Dictionary with update status
+    def get_tasks_by_priority(self, priority: int) -> Dict[str, Any]:
         """
-        return TaskTool.update_task(task_id, updates)   "status": "pending_db_execution",
-            "message": "Task query pending database integration",
-            "filter": {"priority": priority}
-        }
-
-    def get_overdue_tasks(self) -> Dict[str, Any]:
-        """
-        Get all tasks that are past their due date.
-
-        Returns: using TaskTool.
+        Get all tasks with a specific priority level using TaskTool.
 
         Args:
             priority: Priority level to filter by
