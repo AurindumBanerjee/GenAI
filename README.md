@@ -106,15 +106,21 @@ GenAI/
 # 1. Navigate to project directory
 cd GenAI
 
-# 2. Install dependencies
+# 2. (Recommended) Create and activate virtual environment (Windows)
+python -m venv .venv
+.venv\Scripts\activate
+
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 3. Start FastAPI server
+# 4. Start FastAPI server
 uvicorn api.main:app --reload
 
-# 4. Access documentation
+# 5. Access documentation
 # Open: http://localhost:8000/docs
 ```
+
+Step-by-step command checklist: [commands.txt](commands.txt)
 
 ## 🚀 Quick Start
 
@@ -382,7 +388,7 @@ Pydantic models for validation:
 2. **Intent Detection** → Classify intent (task/calendar/note)
 3. **Agent Routing** → Select target agent(s)
 4. **Execution Plan** → Generate workflow steps
-5. **Tool Execution** → (Future) Execute agent methods with actual DB/API calls
+5. **Tool Execution** → Execute agent methods with real DB/API calls
 6. **Result Aggregation** → Combine results from agents
 7. **Response** → Return to user
 
@@ -528,7 +534,7 @@ print(f"Registered: {status['registered_agents']}")
 |-------|--------|----------|
 | Phase 1 | ✅ Complete | Foundation, DB, Base Agents |
 | Phase 2 | ✅ Complete | Tools, Integration, Workflows |
-| Phase 3 | 🚀 Next | REST API Layer |
+| Phase 3 | ✅ Complete | REST API, deployment readiness, docs |
 | Phase 4 | Future | Advanced NLP, Embeddings |
 | Phase 5 | Future | Self-healing, Learning |
 
@@ -542,16 +548,14 @@ All Phase 2 features are now implemented:
 - ✅ Interaction memory (circular buffer)
 - ✅ Structured responses
 
-### Phase 3: Coming Soon 🚀
+### Phase 3 Completion ✅
 
-Next phase will add:
+Phase 3 is now implemented with:
 - FastAPI REST API endpoints
 - HTTP request/response handling
-- Authentication & rate limiting
-- WebSocket real-time updates
 - OpenAPI/Swagger docs
 - Docker containerization
-- Azure Cloud Deployment
+- Deployment and operations documentation
 
 ## 📈 Performance
 
@@ -573,6 +577,7 @@ Response times for Phase 2 operations:
 - **Phase 2 Summary**: [docs/phase2_completion_summary.md](docs/phase2_completion_summary.md) - Phase 2 completion summary
 - **API Documentation**: [docs/api_documentation.md](docs/api_documentation.md) - Complete REST API reference
 - **Deployment Guide**: [docs/deployment_guide.md](docs/deployment_guide.md) - Production deployment guide
+- **Execution Commands**: [commands.txt](commands.txt) - Step-by-step run, test, and validation commands
 
 ## 🧪 Testing & Examples
 
@@ -632,8 +637,8 @@ MIT License - See [LICENSE](LICENSE)
 
 ## Status Overview
 
-**Project Status**: Phase 2 ✅ Complete  
-**Last Updated**: January 15, 2024  
-**Next Phase**: Phase 3 (REST API Layer)  
+**Project Status**: Phase 3 ✅ Complete  
+**Last Updated**: April 8, 2026  
+**Next Phase**: Optional enhancements (Phase 4+)  
 
-All Phase 2 deliverables are complete and tested. Ready for Phase 3 REST API development!
+Core deliverables are complete and tested. The project is ready to run, demo, and deploy.

@@ -1,0 +1,53 @@
+GenAI - Step-by-step commands (Windows)
+
+1) Open terminal and move to project root
+cd d:\MyStuff\GitHub\GenAI
+
+2) Create virtual environment (recommended)
+python -m venv .venv
+
+3) Activate virtual environment
+cmd:
+.venv\Scripts\activate
+PowerShell:
+.\.venv\Scripts\Activate.ps1
+
+4) Install dependencies
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+5) Quick import sanity check
+python -c "from agents import OrchestratorAgent, TaskAgent, CalendarAgent, NotesAgent; print('imports ok')"
+
+6) Run Phase 2 test script
+python test_phase2.py
+
+7) Run demo script
+python demo_phase2.py
+
+8) Start API server
+uvicorn api.main:app --reload
+
+9) In another terminal, health check
+curl http://127.0.0.1:8000/health
+PowerShell alternative:
+Invoke-RestMethod http://127.0.0.1:8000/health
+
+10) In another terminal, run a workflow query
+curl -X POST http://127.0.0.1:8000/query -H "Content-Type: application/json" -d "{\"user_input\":\"Schedule meeting tomorrow at 3 PM and create a task\"}"
+PowerShell alternative:
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/query -ContentType "application/json" -Body '{"user_input":"Schedule meeting tomorrow at 3 PM and create a task"}'
+
+11) Open API docs
+http://127.0.0.1:8000/docs
+
+12) Optional: run with Docker
+docker build -t genai-api .
+docker run -p 8000:8000 genai-api
+
+13) Stop server
+Ctrl+C
+
+Notes:
+- If 'curl' is unavailable in your shell, use Postman or browser for GET endpoints.
+- Database file is created at data\app.db automatically on first run.
